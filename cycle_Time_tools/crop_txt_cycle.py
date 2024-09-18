@@ -27,32 +27,32 @@ def format_time(seconds, microseconds):
     return f"{hours:02}:{minutes:02}:{seconds:02}:{milliseconds:06}"
 
 
-def select_rois(frame, num_rois):
+def select_rois(frame, num_rois, video_name):
     rois = []
     for i in range(num_rois):
-        cv2.namedWindow("Select ROI", cv2.WINDOW_NORMAL)
+        cv2.namedWindow(video_name, cv2.WINDOW_NORMAL)
         height, width = frame.shape[:2]
-        cv2.resizeWindow("Select ROI", width, height)
-        cv2.imshow("Select ROI", frame)
+        # cv2.resizeWindow("Select ROI", width, height)
+        # cv2.imshow("Select ROI", frame)
 
-        roi = cv2.selectROI("Select ROI", frame, fromCenter=False, showCrosshair=True)
+        roi = cv2.selectROI(video_name, frame, fromCenter=False, showCrosshair=True)
         if roi == (0, 0, 0, 0):
             break
 
         # Draw ROI in blue
         x, y, w, h = roi
         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-        cv2.imshow("Select ROI", frame)
+        # cv2.imshow("Select ROI", frame)
         cv2.waitKey(1)
 
         # Finalize ROI by drawing in green
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.imshow("Select ROI", frame)
+        # cv2.imshow("Select ROI", frame)
         cv2.waitKey(1)
 
         rois.append(roi)
 
-    cv2.destroyWindow("Select ROI")
+    cv2.destroyWindow(video_name)
     return rois
 
 
@@ -70,7 +70,7 @@ def write_frame_names_to_files(video_path, base_text_file_path, label, save_dire
         print("Error: Unable to read the first frame.")
         return
 
-    rois = select_rois(frame, num_crops)
+    rois = select_rois(frame, num_crops, video_name)
     if not rois:
         print("No ROIs selected. Exiting.")
         return
@@ -106,7 +106,7 @@ def write_frame_names_to_files(video_path, base_text_file_path, label, save_dire
                 frame_name = f'{video_name}_{frame_count}_{unique_value}.jpg'
                 file_path = text_files[i]
                 with open(file_path, 'a') as roi_file:
-                    roi_file.write(f'{frame_name}  Label={label}  Time={time_str} \n')
+                    roi_file.write(f'{frame_name}  {label}  {time_str} \n') 
                     print(f"Added frame name: {frame_name} Label={label} Time={time_str} ")
                 cv2.imwrite(os.path.join(roi_directories[i], frame_name), cropped_frame)
 
